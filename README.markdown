@@ -1,3 +1,12 @@
+# Ruby on Rails Tutorial: example application 01/25/2012
+
+This is the example application for
+[*Ruby on Rails Tutorial: Learn Rails by Example*](http://railstutorial.org/)
+by [Michael Hartl](http://michaelhartl.com/). 
+
+This "example" application was created by Anne Remy.
+
+
 == Welcome to Rails
 
 Rails is a web-application framework that includes everything needed to create
