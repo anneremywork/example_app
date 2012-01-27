@@ -1,0 +1,42 @@
+# ~.autotest
+require 'autotest_notification'
+require 'autosnarl' # enable pop-up windows
+require 'autotest/restart' # optional: forces autotest to pick the changes to this file
+require 'redgreen/autotest' #optional: red for errors and green for success colors
+require 'autotest/timestamp' # optional: shows timestamps for test runs
+require 'snarl'
+require 'test_notifier/runner/autotest'
+SPEAKING = false
+DOOM_EDITION = false
+BUUF = false
+PENDING = false
+STICKY = false
+SUCCESS_SOUND = ''
+FAILURE_SOUND = ''
+
+
+# filter out VCS files and other garbage to reduce HDD usage
+Autotest.add_hook :initialize do |autotest|
+  %w{.git .svn .hg .DS_Store ._* vendor tmp log doc}.each do |exception|
+    autotest.add_exception(exception)
+  end
+end
+
+Autotest.add_hook :red do |at|
+errors = at.files_to_test.map { |k, v| "#{k}:\n #{v.join("\n ")}"}.join("\n\n")
+#failed_tests = at.files_to_test.inject(0){ |s,a| k,v = a; s + v.size}
+growl "Tests failed:", "#{errors}", '~/.fail.png', 2#, '-s'
+end
+
+Autotest.add_hook :green do |at|
+res = at.results[/\d+ tests.*$/]
+res = at.results.scan(/Finished.*failures/m).to_s.gsub(/\e\[32m/,'')
+growl "Test Results", "#{res}", '~/.pass.png'
+end
+end
+
+Autotest.add_hook :initialize do |autotest|
+autotest.add_mapping(%r%^spec/(requests)/.*rb$%) do |filename, _|
+filename
+end
+end

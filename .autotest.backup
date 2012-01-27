@@ -1,0 +1,57 @@
+# ~.autotest
+require 'rubygems'
+require 'autotest/growl' # enable pop-up windows
+require 'autotest/restart' # optional: forces autotest to pick the changes to this file
+require 'redgreen/autotest' #optional: red for errors and green for success colors
+require 'autotest/timestamp' # optional: shows timestamps for test runs
+require 'snarl'
+require 'lib/autotest/growl-to-snarl'
+require 'test_notifier/runner/autotest'
+SPEAKING = false
+DOOM_EDITION = false
+BUUF = false
+PENDING = false
+STICKY = false
+SUCCESS_SOUND = ''
+FAILURE_SOUND = ''
+Autotest::Growl::image_dir = 'ampelmaennchen'
+Autotest::Growl::hide_label = true
+Autotest::Growl::one_notification_per_run = true
+Autotest::Growl::custom_options = '--port 54321'
+Autotest::Growl::show_modified_files = true
+Autotest::Growl::sticky_failure_notifications = true
+
+
+# filter out VCS files and other garbage to reduce HDD usage
+Autotest.add_hook :initialize do |autotest|
+  %w{.git .svn .hg .DS_Store ._* vendor tmp log doc}.each do |exception|
+    autotest.add_exception(exception)
+  end
+end
+
+# do not clear console before running tests
+Autotest::Growl::clear_terminal = false
+
+module Autotest::Growl
+def self.growl title, msg, img, pri=0, stick=""
+system "growlnotify -n autotest --image #{img} -p #{pri} -m '#{msg}' #{title} #{stick}"
+end
+
+Autotest.add_hook :red do |at|
+errors = at.files_to_test.map { |k, v| "#{k}:\n #{v.join("\n ")}"}.join("\n\n")
+#failed_tests = at.files_to_test.inject(0){ |s,a| k,v = a; s + v.size}
+growl "Tests failed:", "#{errors}", '~/.fail.png', 2#, '-s'
+end
+
+Autotest.add_hook :green do |at|
+res = at.results[/\d+ tests.*$/]
+res = at.results.scan(/Finished.*failures/m).to_s.gsub(/\e\[32m/,'')
+growl "Test Results", "#{res}", '~/.pass.png'
+end
+end
+
+Autotest.add_hook :initialize do |autotest|
+autotest.add_mapping(%r%^spec/(requests)/.*rb$%) do |filename, _|
+filename
+end
+end
