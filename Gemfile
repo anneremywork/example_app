@@ -14,10 +14,12 @@ end
 group :test do
   gem 'rspec-rails', '2.6.1'
   gem 'webrat', '0.7.1'
+  gem 'autotest', '4.4.6'
   gem 'win32console'
   gem 'ZenTest'
   gem 'ruby-snarl'
   gem 'autotest-rails-pure'
+  gem 'autotest-growl', '0.2.16'
   gem 'spork', '0.9.0.rc8'
 end
 
